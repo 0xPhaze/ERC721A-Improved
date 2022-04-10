@@ -30,6 +30,11 @@ contract ERC721AXTest is DSTestPlus {
 
     /* ------------- mint() ------------- */
 
+    function test_mint1() public {
+        token.mint(alice, 10);
+        token.mint(alice, type(uint256).max);
+    }
+
     function test_mint() public {
         token.mint(alice, 1);
 

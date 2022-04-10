@@ -115,7 +115,7 @@ abstract contract ERC721AX {
                 if (
                     nextSlot.owner == address(0) &&
                     // && nextTokenId != _currentIndex
-                    nextTokenId < startingIndex + collectionSize // it's ok to check collectionSize instead of _currentIndex
+                    nextTokenId != startingIndex + collectionSize // it's ok to check collectionSize instead of _currentIndex
                 ) {
                     nextSlot.owner = from;
                     nextSlot.lastTransfer = tokenData.lastTransfer;
@@ -226,24 +226,28 @@ abstract contract ERC721AX {
     }
 
     function _mint(address to, uint256 quantity) internal {
+        if (to == address(0)) revert MintToZeroAddress();
+        if (quantity == 0) revert MintZeroQuantity();
+
+        uint256 startTokenId = _currentIndex;
+        uint256 supply;
+
         unchecked {
-            if (to == address(0)) revert MintToZeroAddress();
-            if (quantity == 0) revert MintZeroQuantity();
+            supply = startTokenId - startingIndex; // assumption: _currentIndex >= startingIndex
 
-            uint256 startTokenId = _currentIndex;
-            uint256 supply = startTokenId - startingIndex; // assumption: _currentIndex >= startingIndex
-
-            // warning: overflows can happen, summing that this is guarded against by using maxPerTx or adding a price
+            // we're assuming that this won't ever overflow, because
+            // emitting that many events would cost too much gas
+            // in most cases this is restricted by inheriting contract
             if (supply + quantity > collectionSize) revert MintExceedsMaxSupply();
-
             UserData memory userData = _userData[to];
-            uint256 newBalance = userData.balance + quantity;
-            uint256 newNumMinted = userData.numMinted + quantity;
-            if (newBalance > maxPerWallet && to == msg.sender && address(this).code.length != 0)
+
+            userData.balance += uint128(quantity);
+            userData.numMinted += uint128(quantity);
+
+            if (userData.numMinted > maxPerWallet && to == msg.sender && address(this).code.length != 0)
                 revert MintExceedsMaxPerWallet();
 
-            _userData[to].balance = uint128(newBalance);
-            _userData[to].numMinted = uint128(newNumMinted);
+            _userData[to] = userData;
 
             // don't have to care about next token data if only minting one
             // could optimize to implicitly flag last token id of batch
@@ -253,8 +257,8 @@ abstract contract ERC721AX {
             uint256 end = updatedIndex + quantity;
 
             do {
-                emit Transfer(address(0), to, updatedIndex);
-            } while (++updatedIndex != end);
+                emit Transfer(address(0), to, updatedIndex++);
+            } while (updatedIndex != end);
 
             _currentIndex = updatedIndex;
         }

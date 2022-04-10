@@ -21,7 +21,7 @@ contract MockERC721AX is ERC721AX {
     }
 
     function mint(address user, uint256 quantity) external {
-        if (quantity > maxPerTx) revert MintExceedsMaxPerTx();
+        // if (quantity > maxPerTx) revert MintExceedsMaxPerTx();
         _mint(user, quantity);
     }
 
