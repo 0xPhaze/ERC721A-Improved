@@ -4,10 +4,10 @@ pragma solidity ^0.8.0;
 error CallerNotOwnerNorApproved();
 error MintToZeroAddress();
 error MintZeroQuantity();
-error MintExceedsLimit();
+error MintExceedsMaxSupply();
 error MintExceedsMaxPerWallet();
 error TransferFromIncorrectOwner();
-error TransferToNonERC721ReceiverImplementer();
+error TransferToNonERC721Receiver();
 error TransferToZeroAddress();
 error NonexistentToken();
 
@@ -23,7 +23,7 @@ abstract contract ERC721AX {
 
     struct TokenData {
         address owner;
-        uint56 startTimestamp;
+        uint56 lastTransfer;
         bool nextTokenDataSet;
     }
 
@@ -32,9 +32,9 @@ abstract contract ERC721AX {
         uint128 numMinted;
     }
 
-    uint256 private immutable _startingIndex;
-    uint256 private immutable _collectionSize;
-    uint256 private immutable _maxPerWallet;
+    uint256 public immutable startingIndex;
+    uint256 public immutable collectionSize;
+    uint256 public immutable maxPerWallet;
 
     uint256 private _currentIndex;
 
@@ -57,17 +57,17 @@ abstract contract ERC721AX {
         _name = name_;
         _symbol = symbol_;
 
-        _startingIndex = startingIndex_;
-        _collectionSize = collectionSize_;
-        _maxPerWallet = maxPerWallet_;
+        startingIndex = startingIndex_;
+        collectionSize = collectionSize_;
+        maxPerWallet = maxPerWallet_;
 
-        _currentIndex = _startingIndex;
+        _currentIndex = startingIndex;
     }
 
     /* ------------- External ------------- */
 
     function approve(address to, uint256 tokenId) public {
-        address owner = ERC721AX.ownerOf(tokenId);
+        address owner = ownerOf(tokenId);
 
         if (msg.sender != owner && !isApprovedForAll[owner][msg.sender]) revert CallerNotOwnerNorApproved();
 
@@ -104,22 +104,22 @@ abstract contract ERC721AX {
 
             TokenData storage currSlot = _tokenData[tokenId];
             currSlot.owner = to;
-            currSlot.startTimestamp = uint56(block.timestamp);
+            currSlot.lastTransfer = uint56(block.timestamp);
             currSlot.nextTokenDataSet = true;
 
-            // If the ownership slot of tokenId+1 is not explicitly set, that means the transfer initiator owns it.
-            // Set the slot of tokenId+1 explicitly in storage to maintain correctness for ownerOf(tokenId+1) calls.
-            uint256 nextTokenId = tokenId + 1;
-            TokenData storage nextSlot = _tokenData[nextTokenId];
-            if (
-                !tokenData.nextTokenDataSet &&
-                nextSlot.owner == address(0) &&
-                // && nextTokenId != _currentIndex
-                nextTokenId < _startingIndex + _collectionSize // it's ok to check collectionSize instead of _currentIndex
-            ) {
-                // _tokenData[nextTokenId] = TokenData(from, tokenData.startTimestamp, false);
-                nextSlot.owner = from;
-                nextSlot.startTimestamp = tokenData.startTimestamp;
+            if (!tokenData.nextTokenDataSet) {
+                // If the ownership slot of tokenId+1 is not explicitly set, that means the transfer initiator owns it.
+                // Set the slot of tokenId+1 explicitly in storage to maintain correctness for ownerOf(tokenId+1) calls.
+                uint256 nextTokenId = tokenId + 1;
+                TokenData storage nextSlot = _tokenData[nextTokenId];
+                if (
+                    nextSlot.owner == address(0) &&
+                    // && nextTokenId != _currentIndex
+                    nextTokenId < startingIndex + collectionSize // it's ok to check collectionSize instead of _currentIndex
+                ) {
+                    nextSlot.owner = from;
+                    nextSlot.lastTransfer = tokenData.lastTransfer;
+                }
             }
 
             emit Transfer(from, to, tokenId);
@@ -145,7 +145,7 @@ abstract contract ERC721AX {
             to.code.length != 0 &&
             IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, data) !=
             IERC721Receiver(to).onERC721Received.selector
-        ) revert TransferToNonERC721ReceiverImplementer();
+        ) revert TransferToNonERC721Receiver();
     }
 
     /* ------------- View ------------- */
@@ -161,11 +161,7 @@ abstract contract ERC721AX {
     }
 
     function totalSupply() external view returns (uint256) {
-        return _currentIndex - _startingIndex;
-    }
-
-    function startingIndex() public view returns (uint256) {
-        return _startingIndex;
+        return _currentIndex - startingIndex;
     }
 
     function supportsInterface(bytes4 interfaceId) external view virtual returns (bool) {
@@ -187,46 +183,46 @@ abstract contract ERC721AX {
         return _tokenDataOf(tokenId).owner;
     }
 
-    function _tokenDataOf(uint256 tokenId) internal view returns (TokenData memory) {
-        unchecked {
-            if (!_exists(tokenId)) revert NonexistentToken();
-
-            for (uint256 curr = tokenId; ; --curr) {
-                TokenData memory tokenData = _tokenData[curr];
-                if (tokenData.owner != address(0)) return tokenData;
-            }
-
-            revert NonexistentToken();
-        }
-    }
-
     /* ------------- O(N) read-only ------------- */
 
     function tokenIdsOf(address owner) external view returns (uint256[] memory) {
         unchecked {
             uint256 balance = balanceOf(owner);
-            uint256[] memory tokenIds = new uint256[](balance);
+            uint256[] memory ids = new uint256[](balance);
 
-            if (balance == 0) return tokenIds;
+            if (balance == 0) return ids;
 
-            uint256 endIndex = _currentIndex;
             uint256 count;
+            uint256 endIndex = _currentIndex;
 
-            for (uint256 i = _startingIndex; i < endIndex; ++i) {
+            for (uint256 i = startingIndex; i < endIndex; ++i) {
                 if (owner == ownerOf(i)) {
-                    tokenIds[count++] = i;
-                    if (balance == count) return tokenIds;
+                    ids[count++] = i;
+                    if (balance == count) return ids;
                 }
             }
 
-            return tokenIds;
+            return ids;
         }
     }
 
     /* ------------- Internal ------------- */
 
     function _exists(uint256 tokenId) internal view returns (bool) {
-        return _startingIndex <= tokenId && tokenId < _currentIndex;
+        return startingIndex <= tokenId && tokenId < _currentIndex;
+    }
+
+    function _tokenDataOf(uint256 tokenId) internal view returns (TokenData memory tokenData) {
+        unchecked {
+            if (!_exists(tokenId)) revert NonexistentToken();
+
+            for (uint256 curr = tokenId; ; --curr) {
+                tokenData = _tokenData[curr];
+                if (tokenData.owner != address(0)) return tokenData;
+            }
+
+            revert NonexistentToken();
+        }
     }
 
     function _mint(address to, uint256 quantity) internal {
@@ -235,29 +231,30 @@ abstract contract ERC721AX {
             if (quantity == 0) revert MintZeroQuantity();
 
             uint256 startTokenId = _currentIndex;
-            uint256 supply = startTokenId - _startingIndex; // assumption: _currentIndex >= _startingIndex
+            uint256 supply = startTokenId - startingIndex; // assumption: _currentIndex >= startingIndex
 
             // warning: overflows can happen, summing that this is guarded against by using maxPerTx or adding a price
-            if (supply + quantity > _collectionSize) revert MintExceedsLimit();
+            if (supply + quantity > collectionSize) revert MintExceedsMaxSupply();
 
             UserData memory userData = _userData[to];
             uint256 newBalance = userData.balance + quantity;
             uint256 newNumMinted = userData.numMinted + quantity;
-            if (userData.numMinted + quantity > _maxPerWallet && to == msg.sender && address(this).code.length != 0)
+            if (newBalance > maxPerWallet && to == msg.sender && address(this).code.length != 0)
                 revert MintExceedsMaxPerWallet();
 
             _userData[to].balance = uint128(newBalance);
             _userData[to].numMinted = uint128(newNumMinted);
 
-            _tokenData[startTokenId].owner = to;
-            _tokenData[startTokenId].startTimestamp = uint56(block.timestamp);
+            // don't have to care about next token data if only minting one
+            // could optimize to implicitly flag last token id of batch
+            _tokenData[startTokenId] = TokenData(to, uint56(block.timestamp), quantity == 1);
 
             uint256 updatedIndex = startTokenId;
             uint256 end = updatedIndex + quantity;
 
             do {
-                emit Transfer(address(0), to, updatedIndex++);
-            } while (updatedIndex != end);
+                emit Transfer(address(0), to, updatedIndex);
+            } while (++updatedIndex != end);
 
             _currentIndex = updatedIndex;
         }

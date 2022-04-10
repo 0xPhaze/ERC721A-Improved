@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {ERC721A} from "ERC721A/ERC721A.sol";
 
-error MintExceedsLimit();
+error MintExceedsMaxSupply();
 error MintExceedsMaxPerWallet();
 error MintExceedsMaxPerTx();
 
@@ -33,7 +33,7 @@ contract MockERC721A is ERC721A {
             if (quantity > maxPerTx) revert MintExceedsMaxPerTx();
 
             uint256 supply = _totalMinted();
-            if (supply + quantity > collectionSize) revert MintExceedsLimit();
+            if (supply + quantity > collectionSize) revert MintExceedsMaxSupply();
             if (_numberMinted(user) + quantity > maxPerWallet) revert MintExceedsMaxPerWallet();
             _mint(user, quantity, "", false);
         }

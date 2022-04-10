@@ -43,7 +43,21 @@ contract ERC721AXTest is DSTestPlus {
 
         assertEq(token.balanceOf(alice), 5);
         assertEq(token.numMinted(alice), 5);
-        for (uint256 i; i < 5; i++) assertEq(token.ownerOf(1), alice);
+
+        for (uint256 i; i < 5; i++) assertEq(token.ownerOf(i + 1), alice);
+    }
+
+    function test_mintMultiple() public {
+        token.mint(alice, 5);
+        token.mint(bob, 5);
+
+        assertEq(token.balanceOf(alice), 5);
+        assertEq(token.numMinted(alice), 5);
+        assertEq(token.balanceOf(bob), 5);
+        assertEq(token.numMinted(bob), 5);
+
+        for (uint256 i; i < 5; i++) assertEq(token.ownerOf(i + 1), alice);
+        for (uint256 i; i < 5; i++) assertEq(token.ownerOf(i + 6), bob);
     }
 
     function test_mint_fail_MintToZeroAddress() public {
@@ -51,12 +65,12 @@ contract ERC721AXTest is DSTestPlus {
         token.mint(address(0), 1);
     }
 
-    function test_mint_fail_MintExceedsLimit() public {
+    function test_mint_fail_MintExceedsMaxSupply() public {
         token.mint(bob, 10);
         token.mint(alice, 10);
         token.mint(chris, 10);
 
-        vm.expectRevert(MintExceedsLimit.selector);
+        vm.expectRevert(MintExceedsMaxSupply.selector);
         token.mint(tester, 1);
     }
 
@@ -168,17 +182,35 @@ contract ERC721AXTest is DSTestPlus {
         token.mint(bob, 10);
 
         vm.prank(bob);
-        token.transferFrom(bob, alice, 10);
+        token.transferFrom(bob, chris, 10);
 
         vm.expectRevert(NonexistentToken.selector);
         token.ownerOf(11);
 
-        token.mint(alice, 1);
+        token.mint(alice, 2);
 
+        assertEq(token.ownerOf(9), bob);
+        assertEq(token.ownerOf(10), chris);
         assertEq(token.ownerOf(11), alice);
+        assertEq(token.ownerOf(12), alice);
     }
 
     function test_transferFrom2() public {
+        token.mint(bob, 10);
+        token.mint(alice, 10);
+
+        vm.startPrank(bob);
+        token.transferFrom(bob, bob, 9);
+        token.transferFrom(bob, chris, 10);
+        vm.stopPrank();
+
+        assertEq(token.ownerOf(9), bob);
+        assertEq(token.ownerOf(10), chris);
+        assertEq(token.ownerOf(11), alice);
+        assertEq(token.ownerOf(12), alice);
+    }
+
+    function test_transferFrom3() public {
         token.mint(bob, 29);
 
         vm.prank(bob);
@@ -188,7 +220,7 @@ contract ERC721AXTest is DSTestPlus {
         assertEq(token.ownerOf(30), chris);
     }
 
-    function test_transferFrom3() public {
+    function test_transferFrom4() public {
         token.mint(bob, 10);
 
         vm.prank(bob);
