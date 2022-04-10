@@ -106,7 +106,7 @@ abstract contract ERC721AX {
             if (
                 !tokenData.nextTokenDataSet &&
                 _tokenData[nextTokenId].owner == address(0) &&
-                nextTokenId < _startingIndex + _collectionSize // it's ok to check collectionSize instead of totalSupply, because unminted tokenOwnerships will be overwritten
+                nextTokenId < _startingIndex + _collectionSize // it's ok to check collectionSize instead of totalSupply
             ) {
                 _tokenData[nextTokenId] = TokenData(from, tokenData.startTimestamp, false);
             }
@@ -178,6 +178,8 @@ abstract contract ERC721AX {
 
         revert QueryForNonexistentToken();
     }
+
+    /* ------------- O(N) read-only ------------- */
 
     function tokenIdsOf(address owner) external view returns (uint256[] memory) {
         unchecked {
