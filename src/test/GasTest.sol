@@ -101,38 +101,4 @@ contract GasTest is DSTestPlus {
         vm.prank(bob);
         erc721ax.transferFrom(bob, alice, 1);
     }
-
-    // function test_transferFrom() public {
-    //     erc721ax.mint(alice, 1);
-    //     erc721ax.transferFrom(alice, bob, 1);
-    // }
-
-    // /* ------------- transferFrom() edge-cases ------------- */
-
-    // function test_transferFrom1() public {
-    //     erc721ax.mint(bob, 10);
-
-    //     vm.prank(bob);
-    //     erc721ax.transferFrom(bob, alice, 10);
-
-    //     vm.expectRevert(NonexistentToken.selector);
-    //     erc721ax.ownerOf(11);
-
-    //     erc721ax.mint(alice, 1);
-    // }
-
-    // function test_transferFrom2() public {
-    //     erc721ax.mint(bob, 29);
-
-    //     vm.prank(bob);
-    //     erc721ax.transferFrom(bob, alice, 10);
-    //     erc721ax.mint(chris, 1);
-    // }
-
-    // function test_transferFrom3() public {
-    //     erc721ax.mint(bob, 10);
-
-    //     vm.prank(bob);
-    //     erc721ax.transferFrom(bob, alice, 5);
-    // }
 }
