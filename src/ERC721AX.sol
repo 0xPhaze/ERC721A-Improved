@@ -2,20 +2,19 @@
 pragma solidity ^0.8.0;
 
 error CallerNotOwnerNorApproved();
+error NonexistentToken();
+
 error MintToZeroAddress();
 error MintZeroQuantity();
 error MintExceedsMaxSupply();
 error MintExceedsMaxPerWallet();
+
 error TransferFromIncorrectOwner();
 error TransferToNonERC721Receiver();
 error TransferToZeroAddress();
-error NonexistentToken();
 
 // based on https://github.com/chiru-labs/ERC721A
 // inspired by https://github.com/Rari-Capital/solmate/blob/main/src/tokens/ERC721.sol
-
-// caveats:
-// collectionSize must be < type(uint128).max
 abstract contract ERC721AX {
     event Transfer(address indexed from, address indexed to, uint256 indexed id);
     event Approval(address indexed owner, address indexed spender, uint256 indexed id);

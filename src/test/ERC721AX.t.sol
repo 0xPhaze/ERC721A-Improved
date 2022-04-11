@@ -5,7 +5,7 @@ import {DSTestPlus} from "solmate/test/utils/DSTestPlus.sol";
 import {Vm} from "forge-std/Vm.sol";
 
 import "../ERC721AX.sol";
-import {MockERC721AX} from "./MockERC721AX.sol";
+import {MockERC721AX} from "./mocks/MockERC721AX.sol";
 
 contract ERC721AXTest is DSTestPlus {
     Vm vm = Vm(HEVM_ADDRESS);
@@ -24,7 +24,7 @@ contract ERC721AXTest is DSTestPlus {
         vm.label(bob, "Bob");
         vm.label(chris, "Chris");
 
-        vm.label(tester, "TestContract");
+        vm.label(tester, "Tester");
         vm.label(address(token), "ERC721AX");
     }
 
@@ -32,7 +32,6 @@ contract ERC721AXTest is DSTestPlus {
 
     function test_mint1() public {
         token.mint(alice, 10);
-        token.mint(alice, type(uint256).max);
     }
 
     function test_mint() public {

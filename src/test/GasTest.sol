@@ -4,9 +4,8 @@ pragma solidity ^0.8.0;
 import {DSTestPlus} from "solmate/test/utils/DSTestPlus.sol";
 import {Vm} from "forge-std/Vm.sol";
 
-import "../ERC721AX.sol";
-import {MockERC721A} from "./MockERC721A.sol";
-import {MockERC721AX} from "./MockERC721AX.sol";
+import {MockERC721A} from "./mocks/MockERC721A.sol";
+import {MockERC721AX} from "./mocks/MockERC721AX.sol";
 
 contract GasTest is DSTestPlus {
     Vm vm = Vm(HEVM_ADDRESS);

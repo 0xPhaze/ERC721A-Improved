@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC721AX} from "../ERC721AX.sol";
+import {ERC721AX} from "../../ERC721AX.sol";
 
 error MintExceedsMaxPerTx();
 

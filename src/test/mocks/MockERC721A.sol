@@ -23,7 +23,7 @@ contract MockERC721A is ERC721A {
         maxPerWallet = maxPerWallet_;
     }
 
-    // cannot be immutable in override
+    // cannot be immutable in override and we don't want an extra sload to skew results
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
     }
