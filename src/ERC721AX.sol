@@ -85,7 +85,7 @@ abstract contract ERC721AX {
         uint256 tokenId
     ) public {
         unchecked {
-            TokenData memory tokenData = _tokenDataOf(tokenId);
+            TokenData storage tokenData = _tokenDataOf(tokenId);
 
             if (tokenData.owner != from) revert TransferFromIncorrectOwner();
 
@@ -112,9 +112,8 @@ abstract contract ERC721AX {
                 uint256 nextTokenId = tokenId + 1;
                 TokenData storage nextSlot = _tokenData[nextTokenId];
                 if (
-                    nextSlot.owner == address(0) &&
-                    // && nextTokenId != _currentIndex
-                    nextTokenId != startingIndex + collectionSize // it's ok to check collectionSize instead of _currentIndex
+                    nextSlot.owner == address(0) && nextTokenId != _currentIndex
+                    // nextTokenId != startingIndex + collectionSize // it's ok to check collectionSize instead of _currentIndex
                 ) {
                     nextSlot.owner = from;
                     nextSlot.lastTransfer = tokenData.lastTransfer;
@@ -211,7 +210,7 @@ abstract contract ERC721AX {
         return startingIndex <= tokenId && tokenId < _currentIndex;
     }
 
-    function _tokenDataOf(uint256 tokenId) internal view returns (TokenData memory tokenData) {
+    function _tokenDataOf(uint256 tokenId) internal view returns (TokenData storage tokenData) {
         unchecked {
             if (!_exists(tokenId)) revert NonexistentToken();
 
@@ -225,28 +224,26 @@ abstract contract ERC721AX {
     }
 
     function _mint(address to, uint256 quantity) internal {
-        if (to == address(0)) revert MintToZeroAddress();
-        if (quantity == 0) revert MintZeroQuantity();
-
-        uint256 startTokenId = _currentIndex;
-        uint256 supply;
-
         unchecked {
-            supply = startTokenId - startingIndex; // assumption: _currentIndex >= startingIndex
+            if (to == address(0)) revert MintToZeroAddress();
+            if (quantity == 0) revert MintZeroQuantity();
+
+            uint256 startTokenId = _currentIndex;
+            uint256 supply = startTokenId - startingIndex; // assumption: _currentIndex >= startingIndex
 
             // we're assuming that this won't ever overflow, because
             // emitting that many events would cost too much gas
             // in most cases this is restricted by inheriting contract
             if (supply + quantity > collectionSize) revert MintExceedsMaxSupply();
-            UserData memory userData = _userData[to];
+            UserData storage userData = _userData[to];
+
+            uint256 minted = userData.numMinted + quantity;
 
             userData.balance += uint128(quantity);
-            userData.numMinted += uint128(quantity);
+            userData.numMinted = uint128(minted);
 
-            if (userData.numMinted > maxPerWallet && to == msg.sender && address(this).code.length != 0)
+            if (minted > maxPerWallet && to == msg.sender && address(this).code.length != 0)
                 revert MintExceedsMaxPerWallet();
-
-            _userData[to] = userData;
 
             // don't have to care about next token data if only minting one
             // could optimize to implicitly flag last token id of batch
