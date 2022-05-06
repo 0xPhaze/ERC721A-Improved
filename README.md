@@ -10,10 +10,10 @@ Further optimization could be achieved by storing the number of minted nfts in a
 | :---------------------------- | -----: |
 | _mint 1_                      |        |
 | test_mint1_ERC721A()          |  59806 |
-| test_mint1_ERC721AX()         |  59499 |
+| test_mint1_ERC721AX()         |  59333 |
 | _mint 5_                      |        |
 | test_mint5_ERC721A()          |  67591 |
-| test_mint5_ERC721AX()         |  67297 |
+| test_mint5_ERC721AX()         |  67131 |
 | _transfer 1_                  |        |
 | test_transferFrom1_ERC721A()  |  73861 |
 | test_transferFrom1_ERC721AX() |  49435 |

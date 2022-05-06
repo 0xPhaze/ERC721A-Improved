@@ -247,7 +247,10 @@ abstract contract ERC721AX {
 
             // don't have to care about next token data if only minting one
             // could optimize to implicitly flag last token id of batch
-            _tokenData[startTokenId] = TokenData(to, uint56(block.timestamp), quantity == 1);
+            TokenData storage tokenData = _tokenData[startTokenId];
+            tokenData.owner = to;
+            tokenData.lastTransfer = uint56(block.timestamp);
+            tokenData.nextTokenDataSet = quantity == 1;
 
             uint256 updatedIndex = startTokenId;
             uint256 end = updatedIndex + quantity;
