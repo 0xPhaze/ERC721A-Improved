@@ -2,7 +2,9 @@
 
 Bridging the optimality-gap in [ERC721A](https://github.com/chiru-labs/ERC721A) in a realistic minting setup.
 
-Keeps variables such as `collectionSize` and `maxPerWallet` internally, so that we can skip the (warm) sloads. Also keeps track of whether the next token data has already been set before, so that we don't have to check it (1 cold sload) on every transfer for all eternity.
+- Internally, `tokenData` is passed as storage instead of memory.
+- Keeps track of whether the next token data has already been set before, so that we don't have to check it (1 cold sload) on every transfer for all eternity.
+- Saves (warm) sload on variables such as `collectionSize` and `maxPerWallet`.
 
 Further optimization could be achieved by storing the number of minted nfts in a certain batch and then back-calculating if a certain tokenId is the last in the batch. I.e. if A mints 5 ids, `A 0 0 0 0` is stored. Now, if we transfer the last id in the batch, we know that the token following that one will have to be explicitly set, so we can skip an sload check.
 
