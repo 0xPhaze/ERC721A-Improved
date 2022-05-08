@@ -35,15 +35,15 @@ contract MockERC721A is ERC721A {
             uint256 supply = _totalMinted();
             if (supply + quantity > collectionSize) revert MintExceedsMaxSupply();
             if (_numberMinted(user) + quantity > maxPerWallet) revert MintExceedsMaxPerWallet();
-            _mint(user, quantity, "", false);
+            _mint(user, quantity);
         }
     }
 
     function mintOne(address user) external {
-        _mint(user, 1, "", false);
+        _mint(user, 1);
     }
 
     function mintFive(address user) external {
-        _mint(user, 5, "", false);
+        _mint(user, 5);
     }
 }

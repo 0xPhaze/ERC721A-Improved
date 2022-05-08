@@ -9,16 +9,16 @@ Further optimization could be achieved by storing the number of minted nfts in a
 | Function                      |    Gas |
 | :---------------------------- | -----: |
 | _mint 1_                      |        |
-| test_mint1_ERC721A()          |  59806 |
+| test_mint1_ERC721A()          |  59713 |
 | test_mint1_ERC721AX()         |  59333 |
 | _mint 5_                      |        |
-| test_mint5_ERC721A()          |  67591 |
+| test_mint5_ERC721A()          |  67486 |
 | test_mint5_ERC721AX()         |  67131 |
 | _transfer 1_                  |        |
-| test_transferFrom1_ERC721A()  |  73861 |
+| test_transferFrom1_ERC721A()  |  73837 |
 | test_transferFrom1_ERC721AX() |  49435 |
 | _transfer 5_                  |        |
-| test_transferFrom5_ERC721A()  | 154291 |
+| test_transferFrom5_ERC721A()  | 154195 |
 | test_transferFrom5_ERC721AX() | 127657 |
 
 [Gas snapshot](.gas-snapshot)
