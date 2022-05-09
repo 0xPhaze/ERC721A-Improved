@@ -30,6 +30,8 @@ contract GasTest is DSTestPlus {
         vm.label(address(erc721a), "ERC721A");
         vm.label(address(erc721ax), "ERC721AX");
 
+        erc721a.mint(tester, 1);
+        erc721ax.mint(tester, 1);
         erc721a.mint(tester, 5);
         erc721ax.mint(tester, 5);
 
@@ -77,19 +79,27 @@ contract GasTest is DSTestPlus {
         erc721ax.transferFrom(tester, bob, 1);
     }
 
-    function test_transferFrom5_ERC721A() public {
-        erc721a.transferFrom(tester, bob, 1);
-        erc721a.transferFrom(bob, alice, 1);
-        erc721a.transferFrom(alice, chris, 1);
-        erc721a.transferFrom(chris, bob, 1);
-        erc721a.transferFrom(bob, alice, 1);
+    function test_transferFrom2_ERC721A() public {
+        erc721a.transferFrom(tester, bob, 2);
     }
 
-    function test_transferFrom5_ERC721AX() public {
-        erc721ax.transferFrom(tester, bob, 1);
-        erc721ax.transferFrom(bob, alice, 1);
-        erc721ax.transferFrom(alice, chris, 1);
-        erc721ax.transferFrom(chris, bob, 1);
-        erc721ax.transferFrom(bob, alice, 1);
+    function test_transferFrom2_ERC721AX() public {
+        erc721ax.transferFrom(tester, bob, 2);
+    }
+
+    function test_transferFrom3_ERC721A() public {
+        erc721a.transferFrom(tester, bob, 2);
+        erc721a.transferFrom(bob, tester, 2);
+        erc721a.transferFrom(tester, bob, 2);
+        erc721a.transferFrom(bob, tester, 2);
+        erc721a.transferFrom(tester, bob, 2);
+    }
+
+    function test_transferFrom3_ERC721AX() public {
+        erc721ax.transferFrom(tester, bob, 2);
+        erc721ax.transferFrom(bob, tester, 2);
+        erc721ax.transferFrom(tester, bob, 2);
+        erc721ax.transferFrom(bob, tester, 2);
+        erc721ax.transferFrom(tester, bob, 2);
     }
 }

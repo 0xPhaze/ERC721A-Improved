@@ -10,18 +10,18 @@ Further optimization could be achieved by storing the number of minted nfts in a
 
 | Function                      |    Gas |
 | :---------------------------- | -----: |
-| _mint 1_                      |        |
-| test_mint1_ERC721A()          |  59713 |
-| test_mint1_ERC721AX()         |  59333 |
-| _mint 5_                      |        |
-| test_mint5_ERC721A()          |  67486 |
-| test_mint5_ERC721AX()         |  67131 |
-| _transfer 1_                  |        |
-| test_transferFrom1_ERC721A()  |  73837 |
-| test_transferFrom1_ERC721AX() |  72256 |
-| _transfer 5_                  |        |
-| test_transferFrom5_ERC721A()  | 154195 |
-| test_transferFrom5_ERC721AX() | 145517 |
+| test_mint1_ERC721A()          |  59669 |
+| test_mint1_ERC721AX()         |  59355 |
+| test_mint5_ERC721A()          |  67508 |
+| test_mint5_ERC721AX()         |  67164 |
+| test_transferFrom1_ERC721A()  |  53562 |
+| test_transferFrom1_ERC721AX() |  49402 |
+| test_transferFrom2_ERC721A()  |  73843 |
+| test_transferFrom2_ERC721AX() |  72324 |
+| test_transferFrom3_ERC721A()  | 121225 |
+| test_transferFrom3_ERC721AX() | 108486 |
+
+`test_transferFrom2` is when the optimization regarding `nextTokenDataSet` is not in effect.
 
 [Gas snapshot](.gas-snapshot)
 
