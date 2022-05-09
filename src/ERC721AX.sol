@@ -85,7 +85,7 @@ abstract contract ERC721AX {
         uint256 tokenId
     ) public {
         unchecked {
-            TokenData storage tokenData = _tokenDataOf(tokenId);
+            TokenData memory tokenData = _tokenDataOf(tokenId);
 
             if (tokenData.owner != from) revert TransferFromIncorrectOwner();
 
@@ -210,7 +210,7 @@ abstract contract ERC721AX {
         return startingIndex <= tokenId && tokenId < _currentIndex;
     }
 
-    function _tokenDataOf(uint256 tokenId) internal view returns (TokenData storage tokenData) {
+    function _tokenDataOf(uint256 tokenId) internal view returns (TokenData memory tokenData) {
         unchecked {
             if (!_exists(tokenId)) revert NonexistentToken();
 
