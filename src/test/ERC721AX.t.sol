@@ -233,4 +233,14 @@ contract ERC721AXTest is DSTestPlus {
         assertEq(token.ownerOf(5), alice);
         assertEq(token.ownerOf(6), bob);
     }
+
+    function test_transferFrom5() public {
+        token.mint(bob, 10);
+
+        vm.prank(bob);
+        token.transferFrom(bob, alice, 1);
+
+        assertEq(token.ownerOf(1), alice);
+        assertEq(token.ownerOf(2), bob);
+    }
 }

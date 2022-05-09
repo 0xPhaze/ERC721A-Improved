@@ -101,11 +101,17 @@ abstract contract ERC721AX {
             --_userData[from].balance;
             ++_userData[to].balance;
 
-            tokenData.owner = to;
-            tokenData.lastTransfer = uint56(block.timestamp);
+            TokenData storage currSlot = _tokenData[tokenId];
+            currSlot.owner = to;
+            currSlot.lastTransfer = uint56(block.timestamp);
 
-            if (!tokenData.nextTokenDataSet) {
-                tokenData.nextTokenDataSet = true;
+            if (!currSlot.nextTokenDataSet) {
+                currSlot.nextTokenDataSet = true;
+                // tokenData.owner = to;
+                // tokenData.lastTransfer = uint56(block.timestamp);
+
+                // if (!tokenData.nextTokenDataSet) {
+                // tokenData.nextTokenDataSet = true;
                 // If the ownership slot of tokenId+1 is not explicitly set, that means the transfer initiator owns it.
                 // Set the slot of tokenId+1 explicitly in storage to maintain correctness for ownerOf(tokenId+1) calls.
                 uint256 nextTokenId = tokenId + 1;
