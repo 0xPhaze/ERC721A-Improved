@@ -102,8 +102,6 @@ abstract contract ERC721AX {
             ++_userData[to].balance;
 
             TokenData storage currSlot = _tokenData[tokenId];
-            currSlot.owner = to;
-            currSlot.lastTransfer = uint56(block.timestamp);
 
             if (!currSlot.nextTokenDataSet) {
                 currSlot.nextTokenDataSet = true;
@@ -120,6 +118,9 @@ abstract contract ERC721AX {
                     nextSlot.lastTransfer = tokenData.lastTransfer;
                 }
             }
+
+            currSlot.owner = to;
+            currSlot.lastTransfer = uint56(block.timestamp);
 
             emit Transfer(from, to, tokenId);
         }
