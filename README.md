@@ -18,10 +18,10 @@ Further optimization could be achieved by storing the number of minted nfts in a
 | test_mint5_ERC721AX()         |  67131 |
 | _transfer 1_                  |        |
 | test_transferFrom1_ERC721A()  |  73837 |
-| test_transferFrom1_ERC721AX() |  49435 |
+| test_transferFrom1_ERC721AX() |  72256 |
 | _transfer 5_                  |        |
 | test_transferFrom5_ERC721A()  | 154195 |
-| test_transferFrom5_ERC721AX() | 127657 |
+| test_transferFrom5_ERC721AX() | 145517 |
 
 [Gas snapshot](.gas-snapshot)
 
